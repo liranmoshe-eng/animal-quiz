@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>חידון חיות</title>
+  <title>חידון חיות — גרסה קלה</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -47,200 +47,368 @@
   <style>body { box-sizing: border-box; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100">
-  <div id="app" class="h-full w-full overflow-auto p-4"><!-- Header -->
-   <div class="text-center mb-4">
-    <h1 id="gameTitle" class="text-3xl font-bold text-amber-800 mb-1">🐾 חידון חיות 🐾</h1>
-    <p class="text-amber-600 text-sm">לחצו על קלף כדי לענות על שאלה</p>
-   </div><!-- Game Grid -->
-   <div id="gameGrid" class="grid grid-cols-8 gap-1.5 max-w-4xl mx-auto mb-4"><!-- Cards will be generated here -->
-   </div><!-- Question Modal -->
-   <div id="questionModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative">
-     <div class="text-center mb-4"><span class="text-4xl mb-2 block" id="questionEmoji">🐾</span>
-      <p id="questionText" class="text-lg font-medium text-gray-800 leading-relaxed"></p>
-     </div>
-     <div id="answersContainer" class="space-y-2"><!-- Answers will be generated here -->
-     </div><button id="closeModal" class="absolute top-3 left-3 text-gray-400 hover:text-gray-600 text-2xl">×</button>
+ <body class="h-full bg-gradient-to-br from-green-100 via-teal-50 to-emerald-100">
+
+  <!-- Setup Screen -->
+  <div id="setupScreen" class="fixed inset-0 bg-gradient-to-br from-green-100 via-teal-50 to-emerald-100 flex items-center justify-center z-50 p-4">
+   <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-7">
+    <div class="text-center mb-6">
+     <div class="text-5xl mb-2">🐾</div>
+     <h2 class="text-2xl font-bold text-amber-800">חידון חיות</h2>
+     <p class="text-amber-600 text-sm mt-1">הוסיפו את השחקנים</p>
     </div>
-   </div><!-- Color Picker Modal -->
-   <div id="colorModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 text-center">
-     <div class="text-5xl mb-3">
-      🎉
-     </div>
-     <h3 class="text-xl font-bold text-gray-800 mb-2">תשובה נכונה!</h3>
-     <p class="text-gray-600 mb-4">בחרו צבע לקלף:</p>
-     <div class="flex gap-3 justify-center flex-wrap"><button class="color-btn w-12 h-12 rounded-full bg-blue-500 border-4 border-blue-300" data-color="blue"></button> <button class="color-btn w-12 h-12 rounded-full bg-red-500 border-4 border-red-300" data-color="red"></button> <button class="color-btn w-12 h-12 rounded-full bg-yellow-400 border-4 border-yellow-200" data-color="yellow"></button> <button class="color-btn w-12 h-12 rounded-full bg-green-500 border-4 border-green-300" data-color="green"></button> <button class="color-btn w-12 h-12 rounded-full bg-gray-800 border-4 border-gray-600" data-color="black"></button>
-     </div>
+
+    <!-- Add player row -->
+    <div class="flex gap-2 mb-4">
+     <button onclick="addPlayer()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl transition-all shadow-sm flex-shrink-0">
+      + הוסף
+     </button>
+     <input id="newPlayerName" type="text" placeholder="שם השחקן..." maxlength="14" onkeydown="if(event.key==='Enter') addPlayer()"
+       class="flex-1 border-2 border-amber-200 rounded-xl px-3 py-2 text-right focus:outline-none focus:border-amber-400 text-base" />
     </div>
-   </div><!-- Wrong Answer Feedback -->
-   <div id="wrongFeedback" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
-     <div class="text-6xl mb-3">
-      ❌
-     </div>
-     <h3 class="text-xl font-bold text-red-600">תשובה שגויה</h3>
-     <p class="text-gray-500 mt-2">נסו שוב!</p>
-    </div>
+
+    <!-- Players list -->
+    <div id="playersList" class="space-y-2 mb-5 min-h-[2rem]"></div>
+
+    <!-- Start button -->
+    <button id="startBtn" onclick="startGame()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl text-lg transition-all shadow-md hidden">
+     🎮 התחילו לשחק!
+    </button>
    </div>
   </div>
+
+  <div id="app" class="h-full w-full overflow-auto p-4">
+   <!-- Header -->
+   <div class="text-center mb-3 relative">
+    <h1 id="gameTitle" class="text-3xl font-bold text-amber-800 mb-1">🐾 חידון חיות — גרסה קלה 🐾</h1>
+    <button id="midGameRestartBtn" onclick="confirmRestart()" class="hidden absolute left-0 top-0 bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold px-3 py-1.5 rounded-xl text-sm border-2 border-amber-300 transition-all">
+     🔄 התחל מחדש
+    </button>
+   </div>
+
+   <!-- Turn Indicator -->
+   <div id="turnBar" class="max-w-2xl mx-auto mb-3 rounded-xl p-3 text-center font-bold text-white text-lg shadow-md hidden"></div>
+
+   <!-- Players scoreboard -->
+   <div id="scoreboard" class="max-w-2xl mx-auto mb-3 flex gap-2 justify-center flex-wrap hidden"></div>
+
+   <!-- Game Grid -->
+   <div id="gameGrid" class="grid grid-cols-6 gap-2 max-w-2xl mx-auto mb-4"></div>
+
+   <!-- Question Modal -->
+   <div id="questionModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative">
+     <div id="questionPlayerBadge" class="text-center mb-3"></div>
+     <div class="text-center mb-4">
+      <span class="text-4xl mb-2 block" id="questionEmoji">🐾</span>
+      <p id="questionText" class="text-lg font-medium text-gray-800 leading-relaxed"></p>
+     </div>
+     <div id="answersContainer" class="space-y-2"></div>
+     <button id="closeModal" class="absolute top-3 left-3 text-gray-400 hover:text-gray-600 text-2xl">×</button>
+    </div>
+   </div>
+
+   <!-- Correct Answer Modal -->
+   <div id="correctModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 text-center max-w-sm w-full">
+     <div class="text-6xl mb-3">🎉</div>
+     <h3 class="text-xl font-bold text-gray-800 mb-1">תשובה נכונה!</h3>
+     <p id="correctPlayerName" class="text-lg font-bold mb-1"></p>
+     <p class="text-gray-500 text-sm">זכתה בקלף!</p>
+    </div>
+   </div>
+
+   <!-- Wrong Answer Feedback -->
+   <div id="wrongFeedback" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+     <div class="text-6xl mb-3">❌</div>
+     <h3 class="text-xl font-bold text-red-600">תשובה שגויה</h3>
+     <p id="nextPlayerMsg" class="text-gray-500 mt-2 font-medium"></p>
+    </div>
+   </div>
+
+   <!-- Win Modal -->
+   <div id="winModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 text-center max-w-sm w-full">
+     <div class="text-6xl mb-3">🏆</div>
+     <h3 id="winTitle" class="text-3xl font-bold mb-2"></h3>
+     <p id="winName" class="text-xl font-bold mb-1"></p>
+     <p class="text-gray-500 text-sm mb-6">יצרת רצף מקצה לקצה!</p>
+     <button onclick="doRestart()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all hover:scale-105 shadow-md">
+      🎮 משחק חדש!
+     </button>
+    </div>
+   </div>
+
+   <!-- Confirm Restart Modal -->
+   <div id="confirmRestartModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-7 text-center max-w-sm w-full">
+     <div class="text-5xl mb-3">🔄</div>
+     <h3 class="text-xl font-bold text-gray-800 mb-2">להתחיל מחדש?</h3>
+     <p class="text-gray-500 mb-5 text-sm">ההתקדמות הנוכחית תימחק</p>
+     <div class="flex gap-3 justify-center">
+      <button onclick="doRestart()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-xl transition-all">כן, התחל מחדש</button>
+      <button onclick="document.getElementById('confirmRestartModal').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-xl transition-all">ביטול</button>
+     </div>
+    </div>
+   </div>
+
+   <!-- Game End Modal -->
+   <div id="gameEndModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 text-center max-w-sm w-full">
+     <div class="text-6xl mb-3">🏆</div>
+     <h3 class="text-2xl font-bold text-amber-700 mb-2">כל הכבוד!</h3>
+     <div id="finalScores" class="mb-4 space-y-1"></div>
+     <button id="restartBtn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all hover:scale-105 shadow-md">
+      🎮 משחק חדש!
+     </button>
+    </div>
+   </div>
+
+  </div>
   <script>
-    const questions = [
-      { q: "הלשון שלי כהה מאוד ויכולה להגיע לאורך של כ-45 ס״מ. הצבע הכהה מגן עליה מהשמש. מי אני?", a: ["זברה", "ג׳ירפה", "אייל", "ביזון"], correct: 1 },
-      { q: "האף שלי הוא גם כלי נשימה, גם יד, וגם אמצעי תקשורת. יש בו יותר מ-40,000 שרירים. מי אני?", a: ["קרנף", "פיל", "היפופוטם", "גמל"], correct: 1 },
-      { q: "אני החיה היבשתית המהירה בעולם, אבל אני מתעייף אחרי כחצי דקה בלבד. מי אני?", a: ["נמר", "ברדלס", "אריה", "זאב"], correct: 1 },
-      { q: "אני יכול לסובב את הראש כמעט 270 מעלות. מי אני?", a: ["ינשוף", "בז", "נשר", "חסידה"], correct: 0 },
-      { q: "אני יונק נדיר שמטיל ביצים. יש לי מקור כמו של ברווז. מי אני?", a: ["פלטיפוס", "קואלה", "לוטרה", "סמור"], correct: 0 },
-      { q: "הלב שלי שוקל בערך כמו קטנוע קטן. מי אני?", a: ["כריש", "לווייתן כחול", "פיל", "דולפין"], correct: 1 },
-      { q: "אני מסוגל לישון בעמידה בזכות מנגנון מיוחד ברגליים. מי אני?", a: ["סוס", "גמל", "פרה", "ביזון"], correct: 0 },
-      { q: "הדבשת שלי מלאה שומן ולא מים. מי אני?", a: ["למה", "גמל", "אנטילופה", "תאו"], correct: 1 },
-      { q: "אני מתחיל את חיי כיצור עם זימים, ורק אחר כך מפתח ריאות. מי אני?", a: ["סלמנדרה", "צפרדע", "תנין", "לטאה"], correct: 1 },
-      { q: "הגורים שלי ממשיכים להתפתח בתוך כיס מיוחד בבטן. מי אני?", a: ["קואלה", "קנגורו", "אופוסום", "דינגו"], correct: 1 },
-      { q: "אני הדג הגדול בעולם, אך אני אוכל בעיקר פלנקטון. מי אני?", a: ["כריש לבן", "כריש לווייתן", "טונה", "דג חרב"], correct: 1 },
-      { q: "אני משנה צבע לא רק להסוואה אלא גם כדי לתקשר. מי אני?", a: ["איגואנה", "זיקית", "שממית", "לטאה"], correct: 1 },
-      { q: "יש לי שכבת שומן עבה שעוזרת לשמור על חום במים קפואים. מי אני?", a: ["כלב ים", "דוב קוטב", "פינגווין", "לווייתן"], correct: 1 },
-      { q: "אני עוף שאינו מסוגל לעוף, אך אני שוחה מצוין. מי אני?", a: ["יען", "פינגווין", "תרנגול הודו", "נשר"], correct: 1 },
-      { q: "אני טורף גדול עם רעמה שמגנה על הצוואר. מי אני?", a: ["נמר", "אריה", "ברדלס", "זאב"], correct: 1 },
-      { q: "אני בונה סכרים בעזרת עצים. מי אני?", a: ["לוטרה", "בונה", "סמור", "סנאי"], correct: 1 },
-      { q: "אני הציפור היחידה שמסוגלת לרחף במקום אחד באוויר. מי אני?", a: ["דרור", "יונה", "קוליברי", "סנונית"], correct: 2 },
-      { q: "אני דג קטן עם צורה של סוס, והזכר נושא את הביצים. מי אני?", a: ["סוסון ים", "צלופח", "דג חרב", "כריש"], correct: 0 },
-      { q: "אני יכול להיכנס לתרדמת חורף שנמשכת חודשים. מי אני?", a: ["שועל", "דוב", "זאב", "אייל"], correct: 1 },
-      { q: "השריון שלי הוא בעצם חלק מהשלד שלי. מי אני?", a: ["צב", "לטאה", "תנין", "איגואנה"], correct: 0 },
-      { q: "למרות שאני אוכל צמחים, הנשיכה שלי היא אחת החזקות בעולם. מי אני?", a: ["ביזון", "היפופוטם", "קרנף", "תאו"], correct: 1 },
-      { q: "העיניים שלי בצידי הראש ולכן אני רואה כמעט 360 מעלות. מי אני?", a: ["זברה", "סוס", "אייל", "גמל"], correct: 1 },
-      { q: "אני העוף הגדול בעולם. מי אני?", a: ["יען", "פינגווין", "חסידה", "נשר"], correct: 0 },
-      { q: "אני היונק היחיד שמסוגל לעוף באמת. מי אני?", a: ["עטלף", "ינשוף", "סנאי מעופף", "פרפר"], correct: 0 },
-      { q: "יש לי מאות שיניים שמוחלפות כל הזמן. מי אני?", a: ["כריש", "דולפין", "טונה", "צלופח"], correct: 0 },
-      { q: "אני חי בלהקה ויש לי פסים שחורים ולבנים ייחודיים. מי אני?", a: ["סוס", "זברה", "טפיר", "אוקאפי"], correct: 1 },
-      { q: "אני חיה אוסטרלית שאוכלת רק עלי אקליפטוס וישנה 20 שעות ביום. מי אני?", a: ["קנגורו", "קואלה", "וומבט", "טזמני"], correct: 1 },
-      { q: "אני הזוחל הגדול בעולם וחי במים. מי אני?", a: ["אנקונדה", "תנין", "קומודו", "צב ים"], correct: 1 },
-      { q: "אני עכביש גדול ושעיר שחי במנהרות באדמה. מי אני?", a: ["טרנטולה", "אלמנה שחורה", "עכביש גמל", "עכביש זאב"], correct: 0 },
-      { q: "אני דג שיכול לייצר חשמל חזק מספיק להלום טורף. מי אני?", a: ["דג חתול", "צלופח חשמלי", "דג חרב", "טונה"], correct: 1 },
-      { q: "יש לי קרן אחת על האף ואני בסכנת הכחדה. מי אני?", a: ["היפופוטם", "קרנף", "באפלו", "תאו"], correct: 1 },
-      { q: "אני ציפור צבעונית מאמריקה הדרומית עם מקור ענק. מי אני?", a: ["תוכי", "טוקן", "מקאו", "פלמינגו"], correct: 1 },
-      { q: "אני חיה ימית עם שמונה זרועות ושלושה לבבות. מי אני?", a: ["מדוזה", "תמנון", "דיונון", "כוכב ים"], correct: 1 },
-      { q: "אני נחש גדול שהורג את הטרף על ידי חניקה. מי אני?", a: ["קוברה", "אנקונדה", "צפע", "ממבה"], correct: 1 },
-      { q: "אני חרק זוהר בחושך. מי אני?", a: ["חיפושית", "גחלילית", "פרפר", "יתוש"], correct: 1 },
-      { q: "אני יונק ימי חכם מאוד שמשתמש בסונאר. מי אני?", a: ["כריש", "דולפין", "צב ים", "מנטה"], correct: 1 },
-      { q: "אני ציפור ורודה שעומדת על רגל אחת. מי אני?", a: ["שקנאי", "פלמינגו", "חסידה", "אנפה"], correct: 1 },
-      { q: "אני חרק חברתי שבונה קינים ענקיים ועובד בצוות. מי אני?", a: ["דבורה", "נמלה", "צרעה", "טרמיט"], correct: 1 },
-      { q: "אני לטאה גדולה מאינדונזיה שנקראת 'דרקון'. מי אני?", a: ["איגואנה", "דרקון קומודו", "גקו", "חמלאון"], correct: 1 },
-      { q: "אני יונק שחי בעצים ונע לאט מאוד. מי אני?", a: ["קוף", "עצלן", "לימור", "קואלה"], correct: 1 },
-      { q: "אני ציפור שיכולה לחקות קולות, כולל דיבור אנושי. מי אני?", a: ["עורב", "תוכי", "זרזיר", "קוקיה"], correct: 1 },
-      { q: "אני חיה עם שריון קשה שיכולה להתכדרר לכדור. מי אני?", a: ["קיפוד", "ארמדילו", "דורבן", "צב"], correct: 1 },
-      { q: "אני דג שטוח שחי על קרקעית הים ושתי העיניים שלי בצד אחד. מי אני?", a: ["טריגון", "סול", "דג סנפיר", "פלטיסה"], correct: 3 },
-      { q: "אני יונק עם זנב שטוח שעוזר לי לשחות. מי אני?", a: ["לוטרה", "בונה", "סמור", "נוטריה"], correct: 1 },
-      { q: "אני עוף טורף שצד בלילה ויש לי פנים עגולות. מי אני?", a: ["נשר", "ינשוף", "בז", "עיט"], correct: 1 },
-      { q: "אני חיה אפריקאית גדולה שחיה בנהרות ומסוכנת מאוד. מי אני?", a: ["תנין", "היפופוטם", "קרנף", "באפלו"], correct: 1 },
-      { q: "אני פרפר גדול שנודד מרחקים עצומים. מי אני?", a: ["מונרך", "מורפו", "סנונית", "אדמירל"], correct: 0 },
-      { q: "אני קוף גדול מאפריקה, קרוב מאוד לאדם. מי אני?", a: ["גורילה", "שימפנזה", "אורנגאוטן", "בבון"], correct: 1 },
-      { q: "אני יונק קטן עם קוצים שמתכדרר כשמפחד. מי אני?", a: ["דורבן", "קיפוד", "ארמדילו", "אכידנה"], correct: 1 },
-      { q: "אני נחש ארסי עם כובע שמתרחב. מי אני?", a: ["צפע", "קוברה", "ממבה", "פיתון"], correct: 1 },
-      { q: "אני חיה ימית איטית עם שריון קשה. מי אני?", a: ["סרטן", "צב ים", "לובסטר", "קיפוד ים"], correct: 1 },
-      { q: "אני ציפור ים שצוללת עמוק לצוד דגים. מי אני?", a: ["שחף", "קורמורן", "שקנאי", "אלבטרוס"], correct: 2 },
-      { q: "אני יונק מעופף שניזון מפירות. מי אני?", a: ["עטלף פירות", "סנאי מעופף", "לימור", "קוסקוס"], correct: 0 },
-      { q: "אני לטאה קטנה שמטפסת על קירות בזכות כפות מיוחדות. מי אני?", a: ["חמלאון", "גקו", "לטאה", "סלמנדרה"], correct: 1 },
-      { q: "אני חיה אוסטרלית עם כיס שחופרת מנהרות. מי אני?", a: ["קנגורו", "וומבט", "קואלה", "טזמני"], correct: 1 },
-      { q: "אני דג טורף עם שיניים חדות שחי בנהרות דרום אמריקה. מי אני?", a: ["דג חתול", "פיראנה", "ארפיימה", "אנגל"], correct: 1 },
-      { q: "אני ציפור שמביאה מזל לפי האמונה. מי אני?", a: ["עורב", "חסידה", "יונה", "ינשוף"], correct: 1 },
-      { q: "אני חרק שקופץ גבוה מאוד ביחס לגודלו. מי אני?", a: ["ארבה", "פרעוש", "חגב", "צרצר"], correct: 1 },
-      { q: "אני יונק ימי ענק שיש לי שפם ארוך. מי אני?", a: ["כלב ים", "פוקה", "אריה ים", "ניבתן"], correct: 3 },
-      { q: "אני עכביש שבונה רשתות מורכבות לצוד טרף. מי אני?", a: ["טרנטולה", "עכביש גן", "אלמנה שחורה", "עכביש קופץ"], correct: 1 },
-      { q: "אני ציפור קטנה שבונה קן מבוץ. מי אני?", a: ["דרור", "סנונית", "יונה", "זרזיר"], correct: 1 },
-      { q: "אני זוחל קטן שמחליף את הזנב כשתופסים אותו. מי אני?", a: ["לטאה", "גקו", "סלמנדרה", "חמלאון"], correct: 0 },
-      { q: "אני חיה שמייצרת דבש. מי אני?", a: ["צרעה", "דבורה", "זבוב", "פרפר"], correct: 1 }
+    const allQuestions = [
+      { q: "יש לי הצוואר הארוך ביותר בעולם — ארוך כל כך שאני יכול לאכול עלים מראש העץ הכי גבוה. מי אני?", a: ["זברה", "ג׳ירפה", "גמל", "אייל"], correct: 1 },
+      { q: "יש לי חדק ארוך שאני משתמש בו כמו יד — כדי לקחת אוכל, לשתות מים ואפילו לחבק. מי אני?", a: ["קרנף", "פיל", "היפופוטם", "ברדלס"], correct: 1 },
+      { q: "אני החיה המהירה ביותר בעולם — יכול לרוץ מהר כמו מכונית בכביש מהיר. מי אני?", a: ["אריה", "זברה", "ברדלס", "נמר"], correct: 2 },
+      { q: "יש לי דבשת גדולה על הגב שעוזרת לי לשרוד ימים רבים בלי לאכול ולשתות. מי אני?", a: ["סוס", "גמל", "חמור", "זברה"], correct: 1 },
+      { q: "יש לי פסים שחורים ולבנים — לכל אחד ממני יש עיצוב אחר, כמו טביעת אצבע. מי אני?", a: ["סוס", "חמור", "ג׳ירפה", "זברה"], correct: 3 },
+      { q: "יש לי רעמה גדולה סביב הפנים. אני מלך החיות. מי אני?", a: ["נמר", "אריה", "ברדלס", "דוב"], correct: 1 },
+      { q: "אני קופץ על רגלי האחוריות הגדולות ויש לי כיס בבטן שבו אני נושא את הגור שלי. מי אני?", a: ["וומבט", "קואלה", "קנגורו", "טזמני"], correct: 2 },
+      { q: "אני ישן כל החורף בתוך מאורה ומתעורר רק באביב כשחם. מי אני?", a: ["זאב", "שועל", "דוב", "אייל"], correct: 2 },
+      { q: "אני הגדול מכל הקופים. אני חי ביערות אפריקה ואוכל רק עלים ופירות. מי אני?", a: ["שימפנזה", "גורילה", "בבון", "אורנגאוטן"], correct: 1 },
+      { q: "יש לי קוצים חדים על הגב. כשמישהו מפחיד אותי, אני מתכנס לכדור קוצני. מי אני?", a: ["חולד", "נמייה", "קיפוד", "עכבר"], correct: 2 },
+      { q: "אני אוכל רק עלים של עץ אחד מיוחד וישן כמעט 20 שעות ביום. מי אני?", a: ["וומבט", "קנגורו", "קואלה", "טזמני"], correct: 2 },
+      { q: "יש לי קרן אחת גדולה על האף. אני בסכנת הכחדה. מי אני?", a: ["פיל", "היפופוטם", "קרנף", "תאו"], correct: 2 },
+      { q: "אני החיה הכבדה ביותר שחיה על היבשה. אני אוכל עשב ושוכנת ליד הנהר. מי אני?", a: ["פיל", "היפופוטם", "קרנף", "תנין"], correct: 1 },
+      { q: "יש לי פרווה לבנה שמסתירה אותי בשלג. אני חי בקוטב הצפוני. מי אני?", a: ["פינגווין", "כלב ים", "דוב קוטב", "לווייתן"], correct: 2 },
+      { q: "בני אדם רוכבים עלי כבר אלפי שנים. אני יכול לרוץ מהר מגיל יום אחד. מי אני?", a: ["חמור", "גמל", "זברה", "סוס"], correct: 3 },
+      { q: "אני הציפור הגדולה ביותר בעולם — אבל אני לא יכול לעוף. אני רץ מהר מאוד. מי אני?", a: ["פינגווין", "יען", "חסידה", "נשר"], correct: 1 },
+      { q: "אני לא יכול לעוף, אבל אני שוחה מצוין. יש לי פרווה שחורה ולבנה ואני חי בקרח. מי אני?", a: ["יען", "שחף", "פינגווין", "חסידה"], correct: 2 },
+      { q: "אני הציפור היחידה שיכולה לרחף במקום באוויר בלי לזוז. אני שואב צוף מתוך פרחים. מי אני?", a: ["סנונית", "דרור", "יונה", "יונק דבש"], correct: 3 },
+      { q: "יש לי שק עור גדול מתחת למקור שבו אני שומר דגים שצדתי. מי אני?", a: ["אנפה", "שחף", "שקנאי", "חסידה"], correct: 2 },
+      { q: "אני עוף שרואה בלילה. יש לי פנים עגולות ואני מסובב את הראש כמעט מסביב. מי אני?", a: ["נשר", "בז", "עיט", "ינשוף"], correct: 3 },
+      { q: "יש לי נוצות ורודות יפות. הצבע שלי בא מהאוכל שאני אוכלת. מי אני?", a: ["אנפה", "פלמינגו", "חסידה", "שקנאי"], correct: 1 },
+      { q: "אני ציפור גדולה שחוזרת לישראל כל אביב. שמי בעברית פירושו חסד ואני נאמנת לבן זוגי כל החיים. מי אני?", a: ["עגור", "יונה", "חסידה", "עורב"], correct: 2 },
+      { q: "אני ציפור שיכולה ללמוד לדבר ולחזור על מילים. יש לי מקור עקום ונוצות צבעוניות. מי אני?", a: ["עורב", "זרזיר", "תוכי", "קוקיה"], correct: 2 },
+      { q: "אני ציפור גדולה שאוכלת נבלות. אני מנקה את הטבע ומרחף גבוה מאוד. מי אני?", a: ["בז", "עיט", "חסידה", "נשר"], correct: 3 },
+      { q: "אני הבעל חיים הגדול ביותר בעולם — גדול יותר מכל דינוזאור שהיה. מי אני?", a: ["כריש לבן", "פיל ים", "לווייתן כחול", "תנין"], correct: 2 },
+      { q: "יש לי הרבה שיניים חדות מאוד ואני הטורף הכי מפחיד בים. מי אני?", a: ["דולפין", "כריש", "דיונון", "לווייתן"], correct: 1 },
+      { q: "יש לי שמונה ידיים ואני יכול לשנות צבע ברגע. מי אני?", a: ["מדוזה", "דיונון", "כוכב ים", "תמנון"], correct: 3 },
+      { q: "אני משחק, קופץ מהמים ועוזר לאנשים שנפלו לים. אני חכם מאוד. מי אני?", a: ["כריש", "לווייתן", "דולפין", "כלב ים"], correct: 2 },
+      { q: "אני דג קטן שנראה כמו סוס. האבא שלי הוא זה ששומר על הביצים. מי אני?", a: ["דג כדור", "סוסון ים", "דג חרב", "דג ליצן"], correct: 1 },
+      { q: "אני הדג הגדול ביותר בעולם, אבל אני אוכל רק פלנקטון קטן מאוד. מי אני?", a: ["כריש לבן", "טונה", "דג חרב", "כריש לווייתן"], correct: 3 },
+      { q: "כשמישהו מפחיד אותי אני מתנפח לכדור עם קוצים. מי אני?", a: ["דג ליצן", "דג חרב", "דג כדור", "דג חתול"], correct: 2 },
+      { q: "אני דג שטוח. שתי העיניים שלי נמצאות באותו צד של הפנים ואני שוכב על קרקעית הים. מי אני?", a: ["מוסר ים", "דג חרב", "פלטיסה", "שפנין"], correct: 2 },
+      { q: "יש לי שריון על הגב שהוא חלק מהגוף שלי — אי אפשר להוציא אותי מהשריון. מי אני?", a: ["לטאה", "תנין", "צב", "איגואנה"], correct: 2 },
+      { q: "אני הזוחל הגדול ביותר בעולם. אני מסתתר ליד הנהר וצד בעלי חיים שבאים לשתות. מי אני?", a: ["ורן", "נחש", "תנין", "איגואנה"], correct: 2 },
+      { q: "אני יכול לשנות את הצבע שלי כדי להתחבא. יש לי לשון ארוכה מאוד לתפוס חרקים. מי אני?", a: ["שממון", "לטאה", "סלמנדרה", "זיקית"], correct: 3 },
+      { q: "אני נחש שפוחח כובע עגול כשהוא כועס. אני ארסי. מי אני?", a: ["צפע", "פיתון", "קוברה", "ממבה"], correct: 2 },
+      { q: "אני מתחיל חיים במים עם זנב כמו דג. אחר כך גדלות לי רגליים ואני קופץ. מי אני?", a: ["לטאה", "סלמנדרה", "תנין", "צפרדע"], correct: 3 },
+      { q: "אני לטאה קטנה שיכולה ללכת על קירות ותקרה בלי ליפול. מי אני?", a: ["זיקית", "לטאה", "שממון", "איגואנה"], correct: 2 },
+      { q: "אני לטאה גדולה מאינדונזיה שקוראים לה בשם של דרקון. מי אני?", a: ["איגואנה", "חמלאון", "שממון", "ורן קומודו"], correct: 3 },
+      { q: "אני יונק שמטיל ביצים — ולא ציפור! יש לי מקור שטוח כמו של ברווז. מי אני?", a: ["קואלה", "וומבט", "ברווזן", "לוטרה"], correct: 2 },
+      { q: "אני מייצר דבש ועוזרת לפרחים להתרבות כשאני עוברת מפרח לפרח. מי אני?", a: ["צרעה", "פרפר", "דבורה", "חגב"], correct: 2 },
+      { q: "אני דולק בלילה! יש לי אור קטן ירוק בחלק האחורי של הגוף. מי אני?", a: ["יתוש", "פרפר", "חיפושית", "גחלילית"], correct: 3 },
+      { q: "אני בונה רשת דביקה כדי לתפוס חרקים לאכול. מי אני?", a: ["נמלה", "עכביש", "חיפושית", "דבורה"], correct: 1 },
+      { q: "אני חרק קטן מאוד שקופץ גבוה מאוד ביחס לגודלי — גבוה יותר ממה שנראה אפשרי. מי אני?", a: ["חגב", "ארבה", "צרצר", "פרעוש"], correct: 3 },
+      { q: "אני מתחיל חיים כזחל שכורך עצמו בקוקון. אחר כך יוצא מהקוקון יצור יפה עם כנפיים. מי אני?", a: ["פרפר", "דבורה", "חגב", "נמלה"], correct: 0 },
+      { q: "אני חרק שחי במושבה עם מלכה אחת. אנחנו בונים שבילים תת קרקעיים ועובדים יחד. מי אני?", a: ["דבורה", "צרעה", "נמלה", "חיפושית"], correct: 2 },
+      { q: "אני הנחש הכבד ביותר בעולם. אני חי בביצות ויכול לבלוע בעלי חיים גדולים. מי אני?", a: ["קוברה", "צפע", "ממבה", "אנקונדה"], correct: 3 },
+      { q: "אני דג שחי בנהר ויש לי שיניים חדות כמו סכינים. אני צד בלהקה. מי אני?", a: ["דג חתול", "דג חרב", "פיראנה", "מוסר ים"], correct: 2 },
+      { q: "אני עכביש גדול ושעיר — כמו כף יד שלמה. מי אני?", a: ["אלמנה שחורה", "עכביש זאב", "עכביש ענק", "עכביש גן"], correct: 2 },
+      { q: "יש לי כתמים שחורים על הגוף. אני טורף זריז שאוהב לטפס על עצים. מי אני?", a: ["אריה", "ברדלס", "נמר", "זאב"], correct: 2 }
     ];
 
-    const animalEmojis = ["🦒", "🐘", "🐆", "🦉", "🦆", "🐋", "🐴", "🐪", "🐸", "🦘", "🦈", "🦎", "🐻‍❄️", "🐧", "🦁", "🦫", "🐦", "🐠", "🐻", "🐢", "🦛", "🐎", "🦃", "🦇", "🦈", "🦓", "🐨", "🐊", "🕷️", "⚡", "🦏", "🐦", "🐙", "🐍", "✨", "🐬", "🦩", "🐜", "🦎", "🦥", "🦜", "🦔", "🐟", "🦫", "🦉", "🦛", "🦋", "🦍", "🦔", "🐍", "🐢", "🐦", "🦇", "🦎", "🐻", "🐟", "🐦", "🦗", "🦭", "🕸️", "🐦", "🦎", "🐝"];
+    // ── צבעי שחקנים ──
+    const PLAYER_COLORS = ['red','blue','green','yellow','purple','orange'];
+    const PLAYER_BG = { red:'bg-red-500', blue:'bg-blue-500', green:'bg-green-500', yellow:'bg-yellow-400', purple:'bg-purple-500', orange:'bg-orange-500' };
+    const PLAYER_HEX = { red:'#ef4444', blue:'#3b82f6', green:'#22c55e', yellow:'#facc15', purple:'#a855f7', orange:'#f97316' };
+    const PLAYER_NAMES_HE = { red:'אדום', blue:'כחול', green:'ירוק', yellow:'צהוב', purple:'סגול', orange:'כתום' };
 
+    const animalEmojis = ["🦒","🐘","🐆","🦉","🦆","🐋","🐴","🐪","🐸","🦘","🦈","🦎","🐻‍❄️","🐧","🦁","🦫","🐦","🐠","🐻","🐢","🦛","🐎","🦃","🦇","🦈","🦓","🐨","🐊","🕷️","⚡","🦏","🐦","🐙","🐍","✨","🐬","🦩","🐜","🦎","🦥","🦜","🦔","🐟","🦫","🦉","🦛","🦋","🦍","🦔","🐍","🐢","🐦","🦇","🦎","🐻","🐟","🐦","🦗","🦭","🕸️","🐦","🦎","🐝"];
+
+    let players = [];          // [{name, color, score}]
+    let currentPlayerIndex = 0;
     let currentCardIndex = null;
-    let cardColors = new Array(64).fill(null);
-    let answeredCards = new Array(64).fill(false);
+    let cardColors = new Array(36).fill(null);
+    let answeredCards = new Array(36).fill(false);
+    const extendedQuestions = [];
 
-    const defaultConfig = {
-      game_title: "🐾 חידון חיות 🐾",
-      background_color: "#fef3c7",
-      card_color: "#ffffff",
-      text_color: "#92400e",
-      primary_action_color: "#f59e0b",
-      secondary_action_color: "#d97706"
-    };
-
+    const defaultConfig = { game_title:"🐾 חידון חיות — גרסה קלה 🐾", background_color:"#fef3c7", card_color:"#ffffff", text_color:"#92400e", primary_action_color:"#f59e0b", secondary_action_color:"#d97706" };
     let config = { ...defaultConfig };
 
-    function shuffleArray(array) {
-      const shuffled = [...array];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    // ── מסך הגדרה ──
+    let pendingPlayers = []; // שחקנים שנוספו לפני תחילת המשחק
+
+    function addPlayer() {
+      const input = document.getElementById('newPlayerName');
+      const name = input.value.trim();
+      if (!name) { input.focus(); return; }
+      if (pendingPlayers.length >= 6) return; // מקסימום 6
+
+      const colorIndex = pendingPlayers.length;
+      const color = PLAYER_COLORS[colorIndex];
+      pendingPlayers.push({ name, color, score: 0 });
+      input.value = '';
+      input.focus();
+      renderPendingPlayers();
+    }
+
+    function removePendingPlayer(i) {
+      pendingPlayers.splice(i, 1);
+      // עדכן צבעים
+      pendingPlayers = pendingPlayers.map((p, idx) => ({ ...p, color: PLAYER_COLORS[idx] }));
+      renderPendingPlayers();
+    }
+
+    function renderPendingPlayers() {
+      const list = document.getElementById('playersList');
+      list.innerHTML = pendingPlayers.map((p, i) => `
+        <div class="flex items-center gap-2 px-3 py-2 rounded-xl text-white font-bold" style="background:${PLAYER_HEX[p.color]}">
+          <span class="flex-1">${p.name}</span>
+          <button onclick="removePendingPlayer(${i})" class="text-white/70 hover:text-white text-lg leading-none">✕</button>
+        </div>`).join('');
+      document.getElementById('startBtn').classList.toggle('hidden', pendingPlayers.length === 0);
+    }
+
+    function startGame() {
+      if (!pendingPlayers.length) return;
+      players = pendingPlayers.map(p => ({ ...p }));
+      pendingPlayers = [];
+      currentPlayerIndex = 0;
+      document.getElementById('setupScreen').classList.add('hidden');
+      document.getElementById('turnBar').classList.remove('hidden');
+      document.getElementById('scoreboard').classList.remove('hidden');
+      initGame();
+      updateTurnBar();
+      updateScoreboard();
+    }
+
+    // ── אתחול משחק ──
+    function pickRotatingQuestions() {
+      // טוען אינדקסים ששימשו לאחרונה
+      let usedIndices = [];
+      try { usedIndices = JSON.parse(localStorage.getItem('animalQuizUsedEasy') || '[]'); } catch(e) {}
+      const total = allQuestions.length;
+      // בוחר קודם שאלות שלא היו — אם אין מספיק, מוסיף מהישנות
+      const unused = shuffleArray([...Array(total).keys()].filter(i => !usedIndices.includes(i)));
+      const fallback = shuffleArray(usedIndices);
+      const pool = [...unused, ...fallback];
+      const chosen = pool.slice(0, 36);
+      // שומר את הנבחרות כ"שימשו"
+      const newUsed = [...usedIndices, ...chosen].slice(-Math.min(total - 36, total));
+      try { localStorage.setItem('animalQuizUsedEasy', JSON.stringify(newUsed)); } catch(e) {}
+      return chosen.map(i => allQuestions[i]);
+    }
+
+    function initGame() {
+      if (!loadGame()) {
+        extendedQuestions.length = 0;
+        pickRotatingQuestions().forEach(q => extendedQuestions.push(q));
       }
-      return shuffled;
+      document.getElementById('midGameRestartBtn').classList.remove('hidden');
+      createCards();
+      onConfigChange(config);
     }
 
-    const shuffledQuestions = shuffleArray(questions);
-    const extendedQuestions = [];
-    for (let i = 0; i < 64; i++) {
-      extendedQuestions.push(shuffledQuestions[i % shuffledQuestions.length]);
+    function confirmRestart() {
+      document.getElementById('confirmRestartModal').classList.remove('hidden');
     }
 
+    function doRestart() {
+      document.getElementById('confirmRestartModal').classList.add('hidden');
+      document.getElementById('gameEndModal').classList.add('hidden');
+      document.getElementById('turnBar').classList.add('hidden');
+      document.getElementById('scoreboard').classList.add('hidden');
+      document.getElementById('midGameRestartBtn').classList.add('hidden');
+      cardColors = new Array(36).fill(null);
+      answeredCards = new Array(36).fill(false);
+      players = []; pendingPlayers = []; currentPlayerIndex = 0;
+      localStorage.removeItem('animalQuizEasy');
+      document.getElementById('playersList').innerHTML = '';
+      document.getElementById('startBtn').classList.add('hidden');
+      document.getElementById('newPlayerName').value = '';
+      document.getElementById('setupScreen').classList.remove('hidden');
+    }
+
+    function shuffleArray(array) {
+      const s = [...array];
+      for (let i = s.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [s[i], s[j]] = [s[j], s[i]];
+      }
+      return s;
+    }
+
+    // ── פס תור ──
+    function updateTurnBar() {
+      if (!players.length) return;
+      const p = players[currentPlayerIndex];
+      const bar = document.getElementById('turnBar');
+      bar.style.background = PLAYER_HEX[p.color];
+      bar.textContent = `🎯 תור ${p.name}`;
+    }
+
+    // ── לוח ניקוד ──
+    function updateScoreboard() {
+      if (!players.length) return;
+      const sb = document.getElementById('scoreboard');
+      sb.innerHTML = players.map((p,i) => `
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-sm font-bold shadow ${i===currentPlayerIndex?'ring-4 ring-white/70 scale-105':''}" style="background:${PLAYER_HEX[p.color]}">
+          <span>${p.name}</span>
+          <span class="bg-white/30 rounded-full px-2">${p.score}</span>
+        </div>`).join('');
+    }
+
+    // ── קלפים ──
     function createCards() {
       const grid = document.getElementById('gameGrid');
       grid.innerHTML = '';
-      
-      for (let i = 0; i < 64; i++) {
+      for (let i = 0; i < 36; i++) {
         const card = document.createElement('div');
         card.className = 'card aspect-square';
         card.dataset.index = i;
-        
-        const bgColor = cardColors[i] ? getColorClass(cardColors[i]) : 'bg-white';
+        const bgColor = cardColors[i] ? PLAYER_BG[cardColors[i]] : 'bg-white';
         const emoji = animalEmojis[i % animalEmojis.length];
-        
         card.innerHTML = `
           <div class="card-inner w-full h-full relative">
-            <div class="card-front absolute inset-0 ${bgColor} rounded-lg shadow-md border-2 border-amber-200 flex items-center justify-center">
-              <span class="text-xl">${cardColors[i] ? emoji : '❓'}</span>
+            <div class="card-front absolute inset-0 ${bgColor} rounded-lg shadow-md border-2 border-amber-200 flex flex-col items-center justify-center gap-0.5">
+              <span class="${cardColors[i]?'text-xs':'text-base'} font-bold ${cardColors[i]?'text-white':'text-amber-500'} leading-none">${i+1}</span>
+              <span class="text-xl">${cardColors[i] ? emoji : ''}</span>
             </div>
-            <div class="card-back absolute inset-0 bg-amber-100 rounded-lg shadow-md border-2 border-amber-300 flex items-center justify-center">
+            <div class="card-back absolute inset-0 bg-amber-100 rounded-lg shadow-md border-2 border-amber-300 flex flex-col items-center justify-center gap-0.5">
+              <span class="text-xs font-bold text-amber-600 leading-none">${i+1}</span>
               <span class="text-xl">${emoji}</span>
             </div>
-          </div>
-        `;
-        
-        if (!answeredCards[i]) {
-          card.addEventListener('click', () => openQuestion(i));
-        } else {
-          card.style.cursor = 'default';
-        }
-        
+          </div>`;
+        if (!answeredCards[i]) card.addEventListener('click', () => openQuestion(i));
+        else card.style.cursor = 'default';
         grid.appendChild(card);
       }
     }
 
     function getColorClass(color) {
-      const colors = {
-        blue: 'bg-blue-500',
-        red: 'bg-red-500',
-        yellow: 'bg-yellow-400',
-        green: 'bg-green-500',
-        black: 'bg-gray-800'
-      };
-      return colors[color] || 'bg-white';
+      return PLAYER_BG[color] || 'bg-white';
     }
 
+    // ── שאלה ──
     function openQuestion(index) {
       if (answeredCards[index]) return;
-      
       currentCardIndex = index;
       const question = extendedQuestions[index];
-      
+      const p = players[currentPlayerIndex];
+
+      // badge בתוך השאלה
+      const badge = document.getElementById('questionPlayerBadge');
+      badge.innerHTML = `<span class="inline-block px-4 py-1 rounded-full text-white text-sm font-bold" style="background:${PLAYER_HEX[p.color]}">🎯 ${p.name}</span>`;
+
       document.getElementById('questionEmoji').textContent = animalEmojis[index % animalEmojis.length];
       document.getElementById('questionText').textContent = question.q;
-      
+
       const answersContainer = document.getElementById('answersContainer');
       answersContainer.innerHTML = '';
-      
-      const labels = ['א', 'ב', 'ג', 'ד'];
+      const labels = ['א','ב','ג','ד'];
       question.a.forEach((answer, i) => {
         const btn = document.createElement('button');
         btn.className = 'w-full p-3 text-right rounded-xl border-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50 transition-all flex items-center gap-3';
@@ -248,115 +416,240 @@
         btn.addEventListener('click', () => checkAnswer(i));
         answersContainer.appendChild(btn);
       });
-      
       document.getElementById('questionModal').classList.remove('hidden');
     }
 
     function checkAnswer(answerIndex) {
       const question = extendedQuestions[currentCardIndex];
-      
       document.getElementById('questionModal').classList.add('hidden');
-      
-      if (answerIndex === question.correct) {
-        showColorPicker();
-      } else {
-        showWrongFeedback();
-      }
+      if (answerIndex === question.correct) showCorrectFeedback();
+      else showWrongFeedback();
     }
 
-    function showColorPicker() {
-      document.getElementById('colorModal').classList.remove('hidden');
+    // ── תשובה נכונה ──
+    function showCorrectFeedback() {
+      const p = players[currentPlayerIndex];
+      cardColors[currentCardIndex] = p.color;
+      answeredCards[currentCardIndex] = true;
+      p.score++;
+
+      const modal = document.getElementById('correctModal');
+      document.getElementById('correctPlayerName').style.color = PLAYER_HEX[p.color];
+      document.getElementById('correctPlayerName').textContent = `🏅 ${p.name}`;
+      modal.classList.remove('hidden');
+
+      const card = document.querySelector(`[data-index="${currentCardIndex}"]`);
+      if (card) card.classList.add('pulse');
+
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        saveGame();
+        const justPlayed = players[currentPlayerIndex];
+        advanceTurn();
+        createCards();
+        updateTurnBar();
+        updateScoreboard();
+        checkGameEnd(justPlayed);
+        currentCardIndex = null;
+      }, 1800);
     }
 
+    // ── תשובה שגויה ──
     function showWrongFeedback() {
       const feedback = document.getElementById('wrongFeedback');
       feedback.classList.remove('hidden');
-      
       const card = document.querySelector(`[data-index="${currentCardIndex}"]`);
-      card.classList.add('shake');
-      
+      if (card) card.classList.add('shake');
+
+      const nextIdx = (currentPlayerIndex + 1) % players.length;
+      document.getElementById('nextPlayerMsg').textContent = `עכשיו תור ${players[nextIdx].name}`;
+
       setTimeout(() => {
         feedback.classList.add('hidden');
-        card.classList.remove('shake');
+        if (card) card.classList.remove('shake');
+        advanceTurn();
+        updateTurnBar();
+        updateScoreboard();
         currentCardIndex = null;
-      }, 1500);
+      }, 1800);
     }
 
-    function selectColor(color) {
-      cardColors[currentCardIndex] = color;
-      answeredCards[currentCardIndex] = true;
-      
-      document.getElementById('colorModal').classList.add('hidden');
-      
-      const card = document.querySelector(`[data-index="${currentCardIndex}"]`);
-      card.classList.add('pulse');
-      
-      setTimeout(() => {
-        createCards();
-        currentCardIndex = null;
-      }, 300);
+    function advanceTurn() {
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     }
 
-    // Event Listeners
+    // ── בדיקת ניצחון (BFS עם חיבורי אלכסון) ──
+    function checkWin(color) {
+      const COLS = 6, ROWS = 6;
+      // שמונה כיוונים כולל אלכסונים
+      const dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+      function idx(r,c) { return r*COLS+c; }
+      function owned(r,c) { return r>=0&&r<ROWS&&c>=0&&c<COLS&&cardColors[idx(r,c)]===color; }
+
+      // ── בדיקת רצף מלמעלה למטה (שורה 0 → שורה 5) ──
+      const visitedV = new Set();
+      const queueV = [];
+      for (let c=0;c<COLS;c++) if (owned(0,c)) { queueV.push([0,c]); visitedV.add(idx(0,c)); }
+      while (queueV.length) {
+        const [r,c] = queueV.shift();
+        if (r===ROWS-1) return { win:true, axis:'vertical', path:[...visitedV] };
+        for (const [dr,dc] of dirs) {
+          const nr=r+dr, nc=c+dc;
+          if (owned(nr,nc)&&!visitedV.has(idx(nr,nc))) { visitedV.add(idx(nr,nc)); queueV.push([nr,nc]); }
+        }
+      }
+
+      // ── בדיקת רצף מימין לשמאל (עמודה 0 → עמודה 5) ──
+      const visitedH = new Set();
+      const queueH = [];
+      for (let r=0;r<ROWS;r++) if (owned(r,0)) { queueH.push([r,0]); visitedH.add(idx(r,0)); }
+      while (queueH.length) {
+        const [r,c] = queueH.shift();
+        if (c===COLS-1) return { win:true, axis:'horizontal', path:[...visitedH] };
+        for (const [dr,dc] of dirs) {
+          const nr=r+dr, nc=c+dc;
+          if (owned(nr,nc)&&!visitedH.has(idx(nr,nc))) { visitedH.add(idx(nr,nc)); queueH.push([nr,nc]); }
+        }
+      }
+      return { win:false };
+    }
+
+    function highlightWinPath(indices, color) {
+      indices.forEach(i => {
+        const card = document.querySelector(`[data-index="${i}"]`);
+        if (card) {
+          card.style.transform = 'scale(1.15)';
+          card.style.zIndex = '10';
+          card.style.boxShadow = `0 0 18px 6px ${PLAYER_HEX[color]}`;
+          card.style.transition = 'all 0.4s ease';
+        }
+      });
+    }
+
+    // ── סוף משחק ──
+    function checkGameEnd(winnerPlayer) {
+      // בדיקת ניצחון ברצף
+      if (winnerPlayer) {
+        const result = checkWin(winnerPlayer.color);
+        if (result.win) {
+          setTimeout(() => {
+            highlightWinPath(result.path, winnerPlayer.color);
+            setTimeout(() => showWinModal(winnerPlayer), 700);
+          }, 200);
+          return;
+        }
+      }
+      // בדיקת סיום כל הקלפים
+      if (answeredCards.every(Boolean)) {
+        setTimeout(() => {
+          const sorted = [...players].sort((a,b) => b.score - a.score);
+          document.getElementById('finalScores').innerHTML =
+            sorted.map((p,i) => `<div class="flex items-center justify-between px-4 py-2 rounded-xl text-white font-bold" style="background:${PLAYER_HEX[p.color]}">
+              <span>${i===0?'🥇':i===1?'🥈':'🥉'} ${p.name}</span>
+              <span>${p.score} קלפים</span>
+            </div>`).join('');
+          document.getElementById('gameEndModal').classList.remove('hidden');
+        }, 400);
+      }
+    }
+
+    function showWinModal(p) {
+      // האם כמה שחקנים עם אותו צבע? לא — אבל אם שחקן יחיד
+      document.getElementById('winTitle').textContent = 'אלוף! 🎉';
+      document.getElementById('winTitle').style.color = PLAYER_HEX[p.color];
+      document.getElementById('winName').textContent = `🏆 ${p.name} ניצח!`;
+      document.getElementById('winName').style.color = PLAYER_HEX[p.color];
+      document.getElementById('winModal').classList.remove('hidden');
+    }
+
+    // ── שמירה וטעינה ──
+    function saveGame() {
+      try {
+        localStorage.setItem('animalQuizEasy', JSON.stringify({
+          cardColors, answeredCards,
+          questionOrder: extendedQuestions.map(q => allQuestions.indexOf(q)),
+          players, currentPlayerIndex
+        }));
+      } catch(e) {}
+    }
+
+    function loadGame() {
+      try {
+        const saved = localStorage.getItem('animalQuizEasy');
+        if (!saved) return false;
+        const data = JSON.parse(saved);
+        if (data.cardColors && data.answeredCards && data.questionOrder) {
+          cardColors = data.cardColors;
+          answeredCards = data.answeredCards;
+          extendedQuestions.length = 0;
+          data.questionOrder.forEach(idx => extendedQuestions.push(allQuestions[idx] || allQuestions[0]));
+          if (data.players) { players = data.players; currentPlayerIndex = data.currentPlayerIndex || 0; }
+          return true;
+        }
+      } catch(e) {}
+      return false;
+    }
+
+    // ── התחל מחדש ──
+    function restartGame() { doRestart(); }
+
+    document.getElementById('restartBtn').addEventListener('click', restartGame);
     document.getElementById('closeModal').addEventListener('click', () => {
       document.getElementById('questionModal').classList.add('hidden');
       currentCardIndex = null;
     });
 
-    document.querySelectorAll('.color-btn').forEach(btn => {
-      btn.addEventListener('click', () => selectColor(btn.dataset.color));
-    });
-
     function onConfigChange(newConfig) {
       const title = document.getElementById('gameTitle');
-      if (title) {
-        title.textContent = newConfig.game_title || defaultConfig.game_title;
-      }
+      if (title) title.textContent = newConfig.game_title || defaultConfig.game_title;
     }
 
     if (window.elementSdk) {
       window.elementSdk.init({
         defaultConfig,
-        onConfigChange: async (cfg) => {
-          config = { ...defaultConfig, ...cfg };
-          onConfigChange(config);
-        },
+        onConfigChange: async (cfg) => { config = { ...defaultConfig, ...cfg }; onConfigChange(config); },
         mapToCapabilities: (cfg) => ({
           recolorables: [
-            {
-              get: () => cfg.background_color || defaultConfig.background_color,
-              set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
-            },
-            {
-              get: () => cfg.card_color || defaultConfig.card_color,
-              set: (v) => { cfg.card_color = v; window.elementSdk.setConfig({ card_color: v }); }
-            },
-            {
-              get: () => cfg.text_color || defaultConfig.text_color,
-              set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
-            },
-            {
-              get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
-              set: (v) => { cfg.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
-            },
-            {
-              get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
-              set: (v) => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
-            }
+            { get: () => cfg.background_color || defaultConfig.background_color, set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+            { get: () => cfg.card_color || defaultConfig.card_color, set: (v) => { cfg.card_color = v; window.elementSdk.setConfig({ card_color: v }); } },
+            { get: () => cfg.text_color || defaultConfig.text_color, set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+            { get: () => cfg.primary_action_color || defaultConfig.primary_action_color, set: (v) => { cfg.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+            { get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
           ],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
+          borderables: [], fontEditable: undefined, fontSizeable: undefined
         }),
-        mapToEditPanelValues: (cfg) => new Map([
-          ["game_title", cfg.game_title || defaultConfig.game_title]
-        ])
+        mapToEditPanelValues: (cfg) => new Map([["game_title", cfg.game_title || defaultConfig.game_title]])
       });
     }
 
-    // Initialize
-    createCards();
-    onConfigChange(config);
+    // ── בדיקת משחק שמור ──
+    (function() {
+      try {
+        const saved = localStorage.getItem('animalQuizEasy');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.players && data.players.length) {
+            players = data.players;
+            currentPlayerIndex = data.currentPlayerIndex || 0;
+            cardColors = data.cardColors;
+            answeredCards = data.answeredCards;
+            extendedQuestions.length = 0;
+            data.questionOrder.forEach(idx => extendedQuestions.push(allQuestions[idx] || allQuestions[0]));
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('turnBar').classList.remove('hidden');
+            document.getElementById('scoreboard').classList.remove('hidden');
+            document.getElementById('midGameRestartBtn').classList.remove('hidden');
+            createCards();
+            updateTurnBar();
+            updateScoreboard();
+            onConfigChange(config);
+            return;
+          }
+        }
+      } catch(e) {}
+      // no saved game – show setup
+    })();
   </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d917e3b87eee8b9',t:'MTc3Mjk2OTI3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
