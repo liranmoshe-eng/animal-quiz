@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מצגת 1 — זיהוי רגשות ועוצמה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Secular+One&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a3a4a;
+      --ink-soft: #3d5a6c;
+      --paper: #f7fbfc;
+      --sky: #b8e0ea;
+      --mint: #9fd4c4;
+      --sun: #f0c75e;
+      --coral: #e8836b;
+      --lagoon: #2f8f9d;
+      --deep: #1e5f6b;
+      --foam: rgba(255,255,255,0.72);
+      --line: rgba(30, 95, 107, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: "Heebo", sans-serif;
+      color: var(--ink);
+      background: var(--deep);
+      overflow: hidden;
+    }
+
+    .deck {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      height: 100%;
+      width: 100%;
+      padding: clamp(1.25rem, 3vw, 2.5rem);
+      padding-bottom: 4.5rem;
+      position: relative;
+      overflow: auto;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% 0%, rgba(240,199,94,0.35), transparent 55%),
+        radial-gradient(ellipse 70% 60% at 100% 100%, rgba(159,212,196,0.45), transparent 50%),
+        linear-gradient(160deg, #e8f6f8 0%, #f7fbfc 45%, #dceef2 100%);
+      animation: fadeIn 0.35s ease;
+    }
+
+    .slide.active { display: flex; flex-direction: column; }
+
+    .slide.hero {
+      justify-content: flex-end;
+      background:
+        linear-gradient(180deg, rgba(26,58,74,0.15) 0%, rgba(26,58,74,0.55) 55%, rgba(26,58,74,0.82) 100%),
+        radial-gradient(ellipse 100% 80% at 70% 20%, rgba(240,199,94,0.4), transparent 50%),
+        linear-gradient(135deg, #2f8f9d 0%, #1e5f6b 50%, #3d7a6a 100%);
+      color: #fff;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes growBar {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .brand {
+      font-family: "Secular One", sans-serif;
+      font-size: clamp(2.4rem, 7vw, 4.2rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .hero .brand { animation: floaty 4s ease-in-out infinite; }
+
+    h1, h2 {
+      font-family: "Secular One", sans-serif;
+      font-weight: 400;
+      line-height: 1.2;
+    }
+
+    h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 0.6rem; }
+    h2 { font-size: clamp(1.5rem, 3.2vw, 2.2rem); color: var(--deep); margin-bottom: 0.75rem; }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--lagoon);
+      margin-bottom: 0.4rem;
+    }
+
+    .hero .eyebrow { color: var(--sun); }
+
+    .lede {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--ink-soft);
+      max-width: 40rem;
+      line-height: 1.55;
+    }
+
+    .hero .lede { color: rgba(255,255,255,0.9); max-width: 32rem; }
+
+    .hero-content { max-width: 42rem; padding-bottom: 1rem; }
+
+    .step-num {
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 50%;
+      background: var(--lagoon);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-left: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 800px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--foam);
+      border: 1px solid var(--line);
+      border-radius: 1.25rem;
+      padding: 1.1rem 1.25rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .panel h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+      color: var(--deep);
+    }
+
+    ul.clean {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    ul.clean li {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      line-height: 1.45;
+      font-size: 0.98rem;
+    }
+
+    ul.clean li::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--coral);
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .tip {
+      background: linear-gradient(135deg, rgba(240,199,94,0.35), rgba(159,212,196,0.35));
+      border-radius: 1rem;
+      padding: 0.9rem 1.1rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      border: 1px solid rgba(240,199,94,0.4);
+    }
+
+    .tip strong { color: var(--deep); }
+
+    .emotion-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 0.75rem;
+    }
+
+    .chip {
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.65rem;
+      font-weight: 600;
+      font-size: 0.92rem;
+      border: 2px solid transparent;
+      animation: pulseSoft 3s ease-in-out infinite;
+    }
+
+    .chip:nth-child(2) { animation-delay: 0.3s; }
+    .chip:nth-child(3) { animation-delay: 0.6s; }
+    .chip:nth-child(4) { animation-delay: 0.9s; }
+    .chip:nth-child(5) { animation-delay: 1.2s; }
+
+    .chip.joy { background: #fff3b0; color: #7a5c00; }
+    .chip.anger { background: #ffd0c4; color: #8a2e1a; }
+    .chip.sad { background: #c8e4f5; color: #1a4a6a; }
+    .chip.fear { background: #d4e8c8; color: #2d5a1a; }
+    .chip.calm { background: #d8f0ea; color: #1a5a4a; }
+    .chip.worry { background: #e8d4f0; color: #5a2a6a; }
+
+    .week-map {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 0.65rem;
+      margin-top: 0.75rem;
+    }
+
+    .week-slot {
+      text-align: center;
+      padding: 0.85rem 0.5rem;
+      background: #fff;
+      border-radius: 1rem;
+      border: 2px dashed var(--sky);
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .week-slot:hover {
+      border-color: var(--lagoon);
+      transform: translateY(-3px);
+    }
+
+    .week-slot .ico { font-size: 1.6rem; display: block; margin-bottom: 0.3rem; }
+
+    /* Intensity thermometer */
+    .intensity-demo {
+      display: flex;
+      gap: 1.5rem;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .thermo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 90px;
+    }
+
+    .thermo {
+      width: 52px;
+      height: 220px;
+      background: #fff;
+      border: 3px solid var(--deep);
+      border-radius: 999px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .thermo-fill {
+      width: 100%;
+      background: linear-gradient(to top, #9fd4c4, #f0c75e, #e8836b);
+      border-radius: 999px;
+      transition: height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: bottom;
+    }
+
+    .thermo-labels {
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      height: 220px;
+      font-weight: 800;
+      color: var(--deep);
+      font-size: 0.9rem;
+      padding: 0.2rem 0;
+    }
+
+    .level-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      justify-content: center;
+    }
+
+    .level-btns button {
+      border: 2px solid var(--lagoon);
+      background: #fff;
+      color: var(--deep);
+      font-family: inherit;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, transform 0.15s;
+    }
+
+    .level-btns button:hover,
+    .level-btns button.active {
+      background: var(--lagoon);
+      color: #fff;
+      transform: scale(1.04);
+    }
+
+    .volume-meta {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .volume-meta p {
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+      color: var(--ink-soft);
+    }
+
+    /* Game events */
+    .event-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+      margin: 0.75rem 0 1rem;
+    }
+
+    .event-card {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 2px solid var(--line);
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      text-align: center;
+    }
+
+    .event-card:hover, .event-card.selected {
+      border-color: var(--lagoon);
+      box-shadow: 0 8px 24px rgba(47,143,157,0.18);
+      transform: translateY(-2px);
+    }
+
+    .event-card .ico { font-size: 2rem; margin-bottom: 0.35rem; }
+    .event-card .label { font-weight: 700; font-size: 0.95rem; }
+
+    .scale-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .scale-btn {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      border: 3px solid var(--deep);
+      background: #fff;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .scale-btn:hover { transform: scale(1.1); }
+    .scale-btn.picked {
+      background: var(--coral);
+      color: #fff;
+      border-color: var(--coral);
+      animation: pulseSoft 0.5s ease;
+    }
+
+    .game-feedback {
+      text-align: center;
+      font-weight: 600;
+      min-height: 1.5rem;
+      color: var(--deep);
+      margin-top: 0.75rem;
+    }
+
+    /* Graph demo */
+    .graph-area {
+      background: #fff;
+      border-radius: 1.25rem;
+      padding: 1rem 1.25rem 1.25rem;
+      border: 1px solid var(--line);
+      margin-top: 0.5rem;
+      flex: 1;
+      min-height: 260px;
+      position: relative;
+    }
+
+    .graph-svg {
+      width: 100%;
+      height: min(280px, 40vh);
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .ref-img {
+      max-width: 100%;
+      max-height: min(42vh, 340px);
+      object-fit: contain;
+      border-radius: 0.75rem;
+      box-shadow: 0 6px 20px rgba(26,58,74,0.12);
+      background: #fff;
+    }
+
+    .ref-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin-top: 0.75rem;
+    }
+
+    .ref-row .panel { flex: 1; min-width: 220px; }
+
+    .order-list {
+      counter-reset: step;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .order-list li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.75rem;
+      align-items: start;
+      background: var(--foam);
+      border-radius: 0.9rem;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--line);
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .order-list li::before {
+      content: counter(step);
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 50%;
+      background: var(--lagoon);
+      color: #fff;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .ok-badge {
+      display: inline-block;
+      background: var(--mint);
+      color: var(--deep);
+      font-weight: 800;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      margin-right: 0.35rem;
+    }
+
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3.75rem;
+      background: rgba(30, 95, 107, 0.94);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      z-index: 50;
+      color: #fff;
+    }
+
+    .nav button {
+      font-family: inherit;
+      font-weight: 700;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 0.55rem 1.1rem;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .nav button:hover { background: rgba(255,255,255,0.28); }
+    .nav button:disabled { opacity: 0.35; cursor: default; }
+
+    .progress {
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .progress .pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .progress .pip.on {
+      background: var(--sun);
+      transform: scale(1.25);
+    }
+
+    .slide-count {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      min-width: 4rem;
+      text-align: center;
+    }
+
+    .roles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.65rem;
+      margin-top: 0.75rem;
+    }
+
+    .role {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 0.85rem;
+      border-top: 4px solid var(--lagoon);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .role.fear { border-color: #7cb87a; }
+    .role.anger { border-color: #e8836b; }
+    .role.sad { border-color: #6ba3c9; }
+    .role.joy { border-color: #f0c75e; }
+
+    .role strong { display: block; margin-bottom: 0.25rem; font-size: 0.98rem; }
+
+    .howto {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .howto-step {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      background: #fff;
+      border-radius: 0.9rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--line);
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .howto-step .n {
+      font-family: "Secular One", sans-serif;
+      color: var(--coral);
+      font-size: 1.3rem;
+      line-height: 1;
+      min-width: 1.4rem;
+    }
+
+    kbd {
+      font-family: inherit;
+      background: rgba(255,255,255,0.2);
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.3rem;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <!-- 0: Hero -->
+    <section class="slide hero active" data-slide="0">
+      <div class="hero-content">
+        <div class="eyebrow">מפגש ראשון · גילאי 7–13</div>
+        <div class="brand">הרגשות שלי</div>
+        <p class="lede" style="margin-top:0.75rem">
+          מצגת מנחה: זיהוי ושייום רגשות, מפגש עם הרגש בשבוע, ואז עוצמה — בדרך משחקית וברורה.
+        </p>
+      </div>
+    </section>
+
+    <!-- 1: Agenda + order check -->
+    <section class="slide" data-slide="1">
+      <div class="eyebrow">לפני שמתחילים</div>
+      <h1>הסדר שלך — הגיוני ✓</h1>
+      <p class="lede">יש רק חידוד קטן: קודם שם לרגש, אחר כך איפה הוא מופיע, ורק אז כמה חזק. ככה הילדים לא מתבלבלים בין "מה אני מרגיש" לבין "כמה".</p>
+      <div class="grid-2" style="margin-top:1rem">
+        <ol class="order-list">
+          <li><div><span class="ok-badge">1</span><strong>סיכום</strong> — למה חשוב לזהות רגשות</div></li>
+          <li><div><span class="ok-badge">2</span><strong>ציור רגשות</strong> — כמה שיותר שהם מכירים</div></li>
+          <li><div><span class="ok-badge">3</span><strong>רגש בשבוע</strong> — איפה אני פוגש אותו (הפסקה, שיעור…)</div></li>
+          <li><div><span class="ok-badge">4</span><strong>לימוד עוצמה</strong> — מדחום / ווליום 1–5</div></li>
+          <li><div><span class="ok-badge">5</span><strong>משחק</strong> — באיזו עוצמה לכל אירוע</div></li>
+          <li><div><span class="ok-badge">6</span><strong>גרף</strong> — הרגש לאורך היום</div></li>
+        </ol>
+        <div>
+          <div class="panel">
+            <h3>למה הסדר הזה עובד?</h3>
+            <ul class="clean">
+              <li>קודם שפה משותפת (שמות), אחר כך הקשר (מתי), ורק אז מדידה (כמה).</li>
+              <li>ילדים עם אפיון נפשי זקוקים לצעד אחד בכל פעם — פחות עומס קוגניטיבי.</li>
+              <li>הגרף בסוף מחבר הכול: זמן × רגש × עוצמה.</li>
+            </ul>
+          </div>
+          <div class="tip"><strong>טיפ מנחה:</strong> אם ילד מדלג ישר ל"כעסתי מאוד" — החזירו בעדינות: "קודם נשים שם לרגש, אחר כך נבדוק כמה חזק."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2: Summary of photo -->
+    <section class="slide" data-slide="2">
+      <div class="title-row">
+        <span class="step-num">1</span>
+        <h1>סיכום מהצילום — תפקיד הרגשות</h1>
+      </div>
+      <p class="lede">מפגש ראשון ושני: תפקיד הרגשות, זיהוי ושייום. כל רגש — גם הלא נעים — יש לו תפקיד.</p>
+      <div class="roles">
+        <div class="role fear"><strong>פחד</strong>מתריע מסכנה ומכין את הגוף להילחם או לברוח.</div>
+        <div class="role anger"><strong>כעס</strong>עוזר להגן על עצמנו ועל הגבולות שלנו.</div>
+        <div class="role sad"><strong>עצב</strong>מאפשר לבכות, לקבל אמפתיה, או להתבונן פנימה.</div>
+        <div class="role joy"><strong>שמחה</strong>נותנת אנרגיה לפעולה, לחיבורים חברתיים ולהרגשה טובה.</div>
+      </div>
+      <div class="grid-2" style="margin-top:1rem; flex:0">
+        <div class="panel">
+          <h3>למה חשוב לזהות רגשות?</h3>
+          <ul class="clean">
+            <li>כדי לא להגיב אוטומטית — להבין מה "מפעיל" אותנו.</li>
+            <li>כדי להסתדר עם הרגש: לקבל אותו, ואולי לשנות את <strong>עוצמתו</strong>.</li>
+            <li>כדי להבין מה חשוב לנו בחיים.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>מה אומרים לילדים (בקיצור)</h3>
+          <p style="line-height:1.55; color:var(--ink-soft)">
+            "רגשות הם כמו שלטים בגוף — הם מספרים לנו שמשהו קורה.
+            אין רגש 'רע'. יש רגש שעוזר לנו, ואנחנו לומדים לשים לו שם ולשים לב כמה הוא חזק."
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3: Draw emotions -->
+    <section class="slide" data-slide="3">
+      <div class="title-row">
+        <span class="step-num">2</span>
+        <h1>ציירו כמה שיותר רגשות שאתם מכירים</h1>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="howto">
+            <div class="howto-step"><span class="n">א</span><div>מחלקים דף / לוח לבן. כל אחד מצייר פנים או סמל לכל רגש שהוא מכיר.</div></div>
+            <div class="howto-step"><span class="n">ב</span><div>אין תשובה נכונה — גם "מבוכה", "גאווה", "שעמום" מתקבלים.</div></div>
+            <div class="howto-step"><span class="n">ג</span><div>תולים יחד על הקיר → "מילון הרגשות של הקבוצה".</div></div>
+          </div>
+          <div class="emotion-chips">
+            <span class="chip joy">שמחה</span>
+            <span class="chip anger">כעס</span>
+            <span class="chip sad">עצב</span>
+            <span class="chip fear">פחד</span>
+            <span class="chip calm">רוגע</span>
+            <span class="chip worry">דאגה</span>
+          </div>
+          <div class="tip"><strong>אפיון נפשי:</strong> הציעו בחירה — לצייר / לכתוב / להצביע על כרטיס מוכן. הפחיתו לחץ חברתי: "אפשר גם רק אחד-שניים."</div>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <p style="font-size:0.85rem;color:var(--ink-soft);margin-bottom:0.5rem;align-self:stretch">דוגמה: מעגל הרגשות</p>
+          <img class="ref-img" src="assets/01a12fef-8a82-7c6c-b45e-eb2c856a3141.jpg" alt="מעגל הרגשות שלי — טבלה עם רגש, מתי, וכמה">
+        </div>
+      </div>
+    </section>
+
+    <!-- 4: Emotion during the week -->
+    <section class="slide" data-slide="4">
+      <div class="title-row">
+        <span class="step-num">3</span>
+        <h1>בוחרים רגש — ואיפה פוגשים אותו בשבוע</h1>
+      </div>
+      <p class="lede">כל אחד בוחר רגש <strong>אחר</strong> (אם אפשר), ומצייר / מספר איפה הוא נפגש איתו במהלך השבוע.</p>
+      <div class="week-map">
+        <div class="week-slot"><span class="ico" style="width:1.5rem;height:1.5rem;margin:0 auto 0.35rem;border-radius:50%;background:linear-gradient(135deg,#f0c75e,#e8836b)"></span>בבוקר</div>
+        <div class="week-slot"><span class="ico" style="width:1.5rem;height:1.5rem;margin:0 auto 0.35rem;border-radius:0.3rem;background:linear-gradient(135deg,#2f8f9d,#9fd4c4)"></span>בשיעור</div>
+        <div class="week-slot"><span class="ico" style="width:1.5rem;height:1.5rem;margin:0 auto 0.35rem;clip-path:polygon(50% 0%,100% 100%,0% 100%);background:#e8836b;display:inline-block"></span>בהפסקה</div>
+        <div class="week-slot"><span class="ico" style="width:1.5rem;height:1rem;margin:0.25rem auto 0.35rem;border-radius:0.2rem;background:#f0c75e;display:block"></span>בארוחה</div>
+        <div class="week-slot"><span class="ico" style="width:1.5rem;height:1.5rem;margin:0 auto 0.35rem;border-radius:50%;background:#9fd4c4;box-shadow:0.55rem 0 0 #b8e0ea,-0.55rem 0 0 #b8e0ea;display:inline-block"></span>עם חברים</div>
+        <div class="week-slot"><span class="ico" style="width:1.5rem;height:1.2rem;margin:0.15rem auto 0.35rem;border-radius:0.25rem 0.25rem 0 0;background:#2f8f9d;display:block"></span>בערב בבית</div>
+      </div>
+      <div class="grid-2" style="margin-top:1rem; flex:0">
+        <div class="panel">
+          <h3>שאלות מנחות</h3>
+          <ul class="clean">
+            <li>"באיזה רגש בחרת?"</li>
+            <li>"מתי בשבוע אתה פוגש אותו הכי הרבה?"</li>
+            <li>"מה קרה שם? מה עשית / מה רצית?"</li>
+          </ul>
+        </div>
+        <div class="tip" style="margin-top:0">
+          <strong>דוגמה מההפסקה:</strong> "כעסתי כי אחד הילדים לא רצה לשחק איתי." — מקשרים רגש → מקום → סיפור קצר. עדיין בלי מספרים של עוצמה.
+        </div>
+      </div>
+    </section>
+
+    <!-- 5: Teach intensity -->
+    <section class="slide" data-slide="5">
+      <div class="title-row">
+        <span class="step-num">4</span>
+        <h1>לומדים על עוצמת רגש</h1>
+      </div>
+      <p class="lede">אותו רגש יכול להיות חלש או חזק — כמו ווליום במוזיקה, או מדחום.</p>
+      <div class="intensity-demo">
+        <div class="thermo-wrap">
+          <div style="display:flex;gap:0.75rem;align-items:flex-end">
+            <div class="thermo" aria-hidden="true">
+              <div class="thermo-fill" id="thermoFill" style="height:40%"></div>
+            </div>
+            <div class="thermo-labels">
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+            </div>
+          </div>
+          <strong id="thermoLabel">עוצמה 2 — קצת</strong>
+        </div>
+        <div class="level-btns" id="levelBtns">
+          <button type="button" data-level="1">1 · טיפה</button>
+          <button type="button" data-level="2" class="active">2 · קצת</button>
+          <button type="button" data-level="3">3 · בינוני</button>
+          <button type="button" data-level="4">4 · הרבה</button>
+          <button type="button" data-level="5">5 · המון</button>
+        </div>
+        <div class="volume-meta">
+          <p><strong>איך מסבירים בקצרה:</strong> "שמחה 1 = חיוך קטן. שמחה 5 = קופצים משמחה. כעס 1 = קצת מעצבן. כעס 5 = הגוף רוצה לצעוק."</p>
+          <ul class="clean">
+            <li><strong>משחק גוף:</strong> כורעים ליד הרצפה = 1, עומדים זקופים = 5.</li>
+            <li><strong>אצבעות:</strong> מראים מספר באצבעות בלי לדבר.</li>
+            <li><strong>אותו סיפור, עוצמות שונות:</strong> "מישהו לקח לי עיפרון" — כמה כעס לכל אחד?</li>
+          </ul>
+          <div class="tip"><strong>חשוב:</strong> מדגישים שמותר להרגיש חזק. המטרה היא לשים לב — לא "להקטין" בכוח.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6: Intensity game -->
+    <section class="slide" data-slide="6">
+      <div class="title-row">
+        <span class="step-num">5</span>
+        <h1>משחק: באיזו עוצמה?</h1>
+      </div>
+      <p class="lede">בוחרים אירוע → כל אחד מראה (או לוחץ) מספר 1–5. משווים: למה לא לכולם אותה עוצמה?</p>
+      <div class="event-board" id="eventBoard">
+        <div class="event-card selected" data-event="morning" tabindex="0">
+          <div class="label">קמתי בבוקר</div>
+        </div>
+        <div class="event-card" data-event="test" tabindex="0">
+          <div class="label">מבחן בשיעור</div>
+        </div>
+        <div class="event-card" data-event="recess" tabindex="0">
+          <div class="label">בהפסקה לא שיחקו איתי</div>
+        </div>
+        <div class="event-card" data-event="friends" tabindex="0">
+          <div class="label">צהריים עם חברים</div>
+        </div>
+        <div class="event-card" data-event="evening" tabindex="0">
+          <div class="label">שיעורי בית קשים</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-weight:700;color:var(--deep)">העוצמה שלי לאירוע הזה:</p>
+      <div class="scale-row" id="scaleRow">
+        <button type="button" class="scale-btn" data-v="1">1</button>
+        <button type="button" class="scale-btn" data-v="2">2</button>
+        <button type="button" class="scale-btn" data-v="3">3</button>
+        <button type="button" class="scale-btn" data-v="4">4</button>
+        <button type="button" class="scale-btn" data-v="5">5</button>
+      </div>
+      <p class="game-feedback" id="gameFeedback">בחרו אירוע, ואז מספר.</p>
+      <div class="tip"><strong>חוק זהב:</strong> אין תשובה נכונה. שני ילדים יכולים להרגיש אחרת — וזה בסדר. שואלים: "מה גרם לך לבחור את המספר?"</div>
+    </section>
+
+    <!-- 7: Draw the graph -->
+    <section class="slide" data-slide="7">
+      <div class="title-row">
+        <span class="step-num">6</span>
+        <h1>מציירים את הגרף</h1>
+      </div>
+      <p class="lede">ציר אופקי = מתי? · ציר אנכי = כמה אני מרגיש? (1–5) · כל צבע = רגש אחר</p>
+      <div class="graph-area">
+        <svg class="graph-svg" viewBox="0 0 640 280" role="img" aria-label="גרף רגשות לדוגמה לאורך היום">
+          <!-- grid -->
+          <line x1="60" y1="20" x2="60" y2="230" stroke="#1e5f6b" stroke-width="2"/>
+          <line x1="60" y1="230" x2="600" y2="230" stroke="#1e5f6b" stroke-width="2"/>
+          <!-- y labels -->
+          <text x="48" y="34" text-anchor="end" fill="#1e5f6b" font-size="14" font-weight="700">5</text>
+          <text x="48" y="76" text-anchor="end" fill="#1e5f6b" font-size="14" font-weight="700">4</text>
+          <text x="48" y="118" text-anchor="end" fill="#1e5f6b" font-size="14" font-weight="700">3</text>
+          <text x="48" y="160" text-anchor="end" fill="#1e5f6b" font-size="14" font-weight="700">2</text>
+          <text x="48" y="202" text-anchor="end" fill="#1e5f6b" font-size="14" font-weight="700">1</text>
+          <!-- dashed verticals -->
+          <line x1="140" y1="20" x2="140" y2="230" stroke="#b8e0ea" stroke-dasharray="4"/>
+          <line x1="250" y1="20" x2="250" y2="230" stroke="#b8e0ea" stroke-dasharray="4"/>
+          <line x1="360" y1="20" x2="360" y2="230" stroke="#b8e0ea" stroke-dasharray="4"/>
+          <line x1="470" y1="20" x2="470" y2="230" stroke="#b8e0ea" stroke-dasharray="4"/>
+          <line x1="580" y1="20" x2="580" y2="230" stroke="#b8e0ea" stroke-dasharray="4"/>
+          <!-- x labels -->
+          <text x="140" y="252" text-anchor="middle" fill="#3d5a6c" font-size="12">בוקר</text>
+          <text x="250" y="252" text-anchor="middle" fill="#3d5a6c" font-size="12">שיעור</text>
+          <text x="360" y="252" text-anchor="middle" fill="#3d5a6c" font-size="12">הפסקה</text>
+          <text x="470" y="252" text-anchor="middle" fill="#3d5a6c" font-size="12">חברים</text>
+          <text x="580" y="252" text-anchor="middle" fill="#3d5a6c" font-size="12">ערב</text>
+          <!-- happiness yellow: 3,2,5,4,3 -->
+          <polyline class="graph-line" points="140,118 250,160 360,34 470,76 580,118" fill="none" stroke="#e6b800" stroke-width="3" stroke-linejoin="round"/>
+          <!-- anger red: 1,4,1,1,3 -->
+          <polyline class="graph-line" points="140,202 250,76 360,202 470,202 580,118" fill="none" stroke="#e8836b" stroke-width="3" stroke-linejoin="round"/>
+          <!-- fear green: 1,3,1,1,1 -->
+          <polyline class="graph-line" points="140,202 250,118 360,202 470,202 580,202" fill="none" stroke="#6aaa5a" stroke-width="3" stroke-linejoin="round"/>
+          <!-- sadness blue: 1,1,1,2,1 -->
+          <polyline class="graph-line" points="140,202 250,202 360,202 470,160 580,202" fill="none" stroke="#5a9bc7" stroke-width="3" stroke-linejoin="round"/>
+          <!-- dots -->
+          <circle cx="140" cy="118" r="5" fill="#e6b800"/><circle cx="250" cy="160" r="5" fill="#e6b800"/><circle cx="360" cy="34" r="5" fill="#e6b800"/><circle cx="470" cy="76" r="5" fill="#e6b800"/><circle cx="580" cy="118" r="5" fill="#e6b800"/>
+          <circle cx="140" cy="202" r="5" fill="#e8836b"/><circle cx="250" cy="76" r="5" fill="#e8836b"/><circle cx="360" cy="202" r="5" fill="#e8836b"/><circle cx="470" cy="202" r="5" fill="#e8836b"/><circle cx="580" cy="118" r="5" fill="#e8836b"/>
+        </svg>
+        <div class="legend">
+          <span><i class="dot" style="background:#e6b800"></i>שמחה</span>
+          <span><i class="dot" style="background:#e8836b"></i>כעס</span>
+          <span><i class="dot" style="background:#6aaa5a"></i>פחד</span>
+          <span><i class="dot" style="background:#5a9bc7"></i>עצב</span>
+        </div>
+      </div>
+      <div class="tip"><strong>איך מציירים עם הילדים:</strong> מתחילים בנקודות (בוקר=3, שיעור=2…) ורק אז מחברים בקו. מי שמתקשה בגרף — משתמש בטבלת קוביות צבע (כמו במעגל הרגשות) או בעוגה לפי חלק מהיום.</div>
+    </section>
+
+    <!-- 8: Visual tools from photos -->
+    <section class="slide" data-slide="8">
+      <div class="eyebrow">כלי עזר מהחומרים</div>
+      <h1>שלוש דרכים לראות את אותו דבר</h1>
+      <div class="ref-row">
+        <div class="panel">
+          <h3>עוגה לפי חלק מהיום</h3>
+          <img class="ref-img" src="assets/01a12fee-f73c-74e5-8a33-e93f0c2c88d5.jpg" alt="הרגשות שלי היום — עוגות לפי בוקר הפסקה ערב">
+          <p style="margin-top:0.5rem;font-size:0.88rem;color:var(--ink-soft)">טוב למי שאוהב חלקים ויזואליים — כמה מכל רגש באותו זמן.</p>
+        </div>
+        <div class="panel">
+          <h3>גרף קו לאורך היום</h3>
+          <img class="ref-img" src="assets/01a12fef-4d86-76fa-a74e-ce1e88b5c6c0.jpg" alt="גרף רגשות לאורך היום">
+          <p style="margin-top:0.5rem;font-size:0.88rem;color:var(--ink-soft)">טוב לראות עליות וירידות — "השמחה עלתה בהפסקה".</p>
+        </div>
+        <div class="panel">
+          <h3>טבלת עוצמה 0–5</h3>
+          <img class="ref-img" src="assets/01a12fef-8a82-7c6c-b45e-eb2c856a3141.jpg" alt="מעגל הרגשות עם סולם עוצמה">
+          <p style="margin-top:0.5rem;font-size:0.88rem;color:var(--ink-soft)">הכי פשוט להתחלה: צובעים ריבועים לפי כמה חזק.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9: Facilitator tips -->
+    <section class="slide" data-slide="9">
+      <div class="eyebrow">סגירה למנחה</div>
+      <h1>איך מעבירים עוצמה — משחקי וברור</h1>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>עקרונות לגילאי 7–13 עם אפיון נפשי</h3>
+          <ul class="clean">
+            <li>צעד אחד בכל פעם; הפסקה קצרה בין זיהוי לבין עוצמה.</li>
+            <li>בחירה תמידית: ציור / דיבור / הצבעה / כרטיס מוכן.</li>
+            <li>לא מתווכחים על המספר של הילד — שואלים בעניין.</li>
+            <li>אם מוצף: יורדים לעוצמה 1–2 רק כתרגול דמיון ("איך ייראה כעס קטן?") — בלי לכפות שינוי עכשיו.</li>
+            <li>שפה חיובית: "שים לב" במקום "תירגע" / "זה מוגזם".</li>
+          </ul>
+        </div>
+        <div>
+          <div class="panel">
+            <h3>משחקים מהירים לעוצמה</h3>
+            <ul class="clean">
+              <li><strong>מדחום קבוצתי</strong> — כורעים→קמים לפי המספר.</li>
+              <li><strong>שלט ווליום</strong> — מסובבים יד כמו כפתור.</li>
+              <li><strong>קלפי אירוע</strong> — אותו כעס, עוצמות שונות.</li>
+              <li><strong>צבעים</strong> — צובעים 1 עד 5 קוביות.</li>
+            </ul>
+          </div>
+          <div class="tip"><strong>משפט לסיום המפגש:</strong> "היום למדנו: יש שם לרגש, יש מקום שהוא מופיע, ויש עוצמה. בפעם הבאה נתרגל מה עוזר כשהעוצמה גבוהה."</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="nav" aria-label="ניווט במצגת">
+    <button type="button" id="prevBtn">→ הקודם</button>
+    <div class="progress" id="progress" aria-hidden="true"></div>
+    <span class="slide-count" id="slideCount">1 / 10</span>
+    <button type="button" id="nextBtn">הבא ←</button>
+  </nav>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const progress = document.getElementById("progress");
+    const slideCount = document.getElementById("slideCount");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    let i = 0;
+
+    slides.forEach((_, idx) => {
+      const pip = document.createElement("span");
+      pip.className = "pip" + (idx === 0 ? " on" : "");
+      progress.appendChild(pip);
+    });
+
+    const labels = {
+      1: "טיפה",
+      2: "קצת",
+      3: "בינוני",
+      4: "הרבה",
+      5: "המון"
+    };
+
+    function go(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      [...progress.children].forEach((p, idx) => p.classList.toggle("on", idx === i));
+      slideCount.textContent = (i + 1) + " / " + slides.length;
+      prevBtn.disabled = i === 0;
+      nextBtn.disabled = i === slides.length - 1;
+    }
+
+    prevBtn.addEventListener("click", () => go(i - 1));
+    nextBtn.addEventListener("click", () => go(i + 1));
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "PageDown" || e.key === " ") {
+        e.preventDefault();
+        go(i + 1);
+      } else if (e.key === "ArrowRight" || e.key === "PageUp") {
+        e.preventDefault();
+        go(i - 1);
+      } else if (e.key === "Home") go(0);
+      else if (e.key === "End") go(slides.length - 1);
+    });
+
+    // Thermometer
+    const fill = document.getElementById("thermoFill");
+    const thermoLabel = document.getElementById("thermoLabel");
+    document.getElementById("levelBtns").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-level]");
+      if (!btn) return;
+      const level = Number(btn.dataset.level);
+      [...e.currentTarget.querySelectorAll("button")].forEach((b) => b.classList.toggle("active", b === btn));
+      fill.style.height = (level * 20) + "%";
+      thermoLabel.textContent = "עוצמה " + level + " — " + labels[level];
+    });
+
+    // Intensity game
+    const feedback = document.getElementById("gameFeedback");
+    const eventNames = {
+      morning: "קמתי בבוקר",
+      test: "מבחן בשיעור",
+      recess: "בהפסקה לא שיחקו איתי",
+      friends: "צהריים עם חברים",
+      evening: "שיעורי בית קשים"
+    };
+    let currentEvent = "morning";
+
+    document.getElementById("eventBoard").addEventListener("click", (e) => {
+      const card = e.target.closest(".event-card");
+      if (!card) return;
+      [...e.currentTarget.children].forEach((c) => c.classList.remove("selected"));
+      card.classList.add("selected");
+      currentEvent = card.dataset.event;
+      [...document.querySelectorAll(".scale-btn")].forEach((b) => b.classList.remove("picked"));
+      feedback.textContent = "באיזו עוצמה: " + eventNames[currentEvent] + "?";
+    });
+
+    document.getElementById("scaleRow").addEventListener("click", (e) => {
+      const btn = e.target.closest(".scale-btn");
+      if (!btn) return;
+      [...e.currentTarget.children].forEach((b) => b.classList.remove("picked"));
+      btn.classList.add("picked");
+      const v = btn.dataset.v;
+      feedback.textContent =
+        eventNames[currentEvent] + " → עוצמה " + v + " (" + labels[v] + "). יפה שהקשבת לעצמך!";
+    });
+
+    go(0);
+  </script>
+</body>
+</html>
